@@ -32,6 +32,7 @@ echo "export PATH=$PATH:/usr/local/go/bin" >> /etc/profile
 source .profile
 
 # Instalando e configurando cri-docker
+apt install -y git
 git clone https://github.com/Mirantis/cri-dockerd.git
 cd cri-dockerd
 make cri-dockerd
