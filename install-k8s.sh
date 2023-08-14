@@ -26,12 +26,10 @@ sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 
 # Instalando e configurando GO
-sudo apt update
-sudo apt install golang
-wget https://golang.org/dl/go1.20.1.linux-amd64.tar.gz
-sudo tar -xf go1.20.1.linux-amd64.tar.gz -C /usr/local
-echo "export PATH=$PATH:/usr/local/go/bin" >> /etc/profile
-source .profile
+wget https://go.dev/dl/go1.21.0.linux-amd64.tar.gz
+sudo tar -xf go1.21.0.linux-amd64.tar.gz -C /usr/local
+export PATH=$PATH:/usr/local/go/bin
+go version
 
 # Instalando e configurando cri-docker
 apt install -y git make
