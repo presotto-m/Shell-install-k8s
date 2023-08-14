@@ -18,7 +18,8 @@ sudo sysctl --system
 sudo apt-get install gnupg
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
-curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+wget -O- https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor >kubernetes-archive-keyring.gpg
+mv kubernetes-archive-keyring.gpg /etc/apt/trusted.gpg.d/
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
@@ -26,13 +27,14 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 # Instalando e configurando GO
 sudo apt update
+sudo apt install golang
 wget https://golang.org/dl/go1.20.1.linux-amd64.tar.gz
 sudo tar -xf go1.20.1.linux-amd64.tar.gz -C /usr/local
 echo "export PATH=$PATH:/usr/local/go/bin" >> /etc/profile
 source .profile
 
 # Instalando e configurando cri-docker
-apt install -y git
+apt install -y git make
 git clone https://github.com/Mirantis/cri-dockerd.git
 cd cri-dockerd
 make cri-dockerd
