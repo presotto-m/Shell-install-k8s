@@ -26,7 +26,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 # Instalando e configurando GO
 sudo apt update
-wget https://golang.org/dl/go1.20.1.linux-amd64.tar.g
+wget https://golang.org/dl/go1.20.1.linux-amd64.tar.gz
 sudo tar -xf go1.20.1.linux-amd64.tar.gz -C /usr/local
 echo "export PATH=$PATH:/usr/local/go/bin" >> /etc/profile
 source .profile
