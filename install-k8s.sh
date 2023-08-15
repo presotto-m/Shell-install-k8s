@@ -15,6 +15,7 @@ EOF
 sudo sysctl --system
 
 # Instalando e configurando pacotes K8S
+curl -fsSL https://get.docker.com -o install-docker.sh | sh
 sudo apt-get install gnupg
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
