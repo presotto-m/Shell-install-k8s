@@ -1,39 +1,37 @@
 #!/bin/bash
 
-# Instalação dos módulos do kernel
-sudo modprobe overlay
-sudo modprobe br_netfilter
-
-# Configurando parametros sysctl
-
-cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
-net.bridge.bridge-nf-call-iptables  = 1
-net.ipv4.ip_forward                 = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-EOF
-
-sudo sysctl --system
-
-# Instalando e configurando pacotes K8S
-curl -fsSL https://get.docker.com -o install-docker.sh | sh
-sudo apt-get install gnupg
+# atualizando repositorios
 sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates curl
-mkdir /etc/apt/keyrings
-curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+#instalando depencias k8s
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg build-essential docker.io
+
+# criando pasta para gpg k8s
+sudo mkdir -m 755 /etc/apt/keyrings
+
+# download gpg key
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+# adicionando repositorios
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+# atualizando repositorios
 sudo apt-get update
+
+# instalando modulos k8s
 sudo apt-get install -y kubelet kubeadm kubectl
+
+# mark hold modulos
 sudo apt-mark hold kubelet kubeadm kubectl
 
-# Instalando e configurando GO
-wget https://go.dev/dl/go1.21.0.linux-amd64.tar.gz
-sudo tar -xf go1.21.0.linux-amd64.tar.gz -C /usr/local
-export PATH=$PATH:/usr/local/go/bin
-go version
+# baixando golang
+wget https://go.dev/dl/go1.19.4.linux-amd64.tar.gz
 
-# Instalando e configurando cri-docker
-apt install -y git make
+# instalando golang
+rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.4.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+
+# download e instalação cri-docker 
 git clone https://github.com/Mirantis/cri-dockerd.git
 cd cri-dockerd
 make cri-dockerd
@@ -42,16 +40,4 @@ install -o root -g root -m 0755 cri-dockerd /usr/local/bin/cri-dockerd
 install packaging/systemd/* /etc/systemd/system
 sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
 systemctl daemon-reload
-systemctl enable cri-docker.service
 systemctl enable --now cri-docker.socket
-
-# Iniciando cluster
-kubeadm init
-
-# configurando kubectl
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-# Gerando o comando join e executando nos nodes
-kubeadm token create --print-join-command
